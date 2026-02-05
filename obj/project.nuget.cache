@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "G9W8EOS18Sw=",
+  "dgSpecHash": "bDrebFJ/a8Q=",
   "success": true,
-  "projectFilePath": "C:\\Users\\Asus\\Desktop\\UserManagementApp_RENDER\\UserManagementApp_RENDER\\UserManagementApp.csproj",
+  "projectFilePath": "C:\\Users\\Asus\\Desktop\\UserM\\User\\UserManagementApp.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\Asus\\.nuget\\packages\\azure.core\\1.25.0\\azure.core.1.25.0.nupkg.sha512",
     "C:\\Users\\Asus\\.nuget\\packages\\azure.identity\\1.7.0\\azure.identity.1.7.0.nupkg.sha512",

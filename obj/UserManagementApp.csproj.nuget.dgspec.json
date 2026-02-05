@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\Asus\\Desktop\\UserManagementApp_RENDER\\UserManagementApp_RENDER\\UserManagementApp.csproj": {}
+    "C:\\Users\\Asus\\Desktop\\UserM\\User\\UserManagementApp.csproj": {}
   },
   "projects": {
-    "C:\\Users\\Asus\\Desktop\\UserManagementApp_RENDER\\UserManagementApp_RENDER\\UserManagementApp.csproj": {
+    "C:\\Users\\Asus\\Desktop\\UserM\\User\\UserManagementApp.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\Asus\\Desktop\\UserManagementApp_RENDER\\UserManagementApp_RENDER\\UserManagementApp.csproj",
+        "projectUniqueName": "C:\\Users\\Asus\\Desktop\\UserM\\User\\UserManagementApp.csproj",
         "projectName": "UserManagementApp",
-        "projectPath": "C:\\Users\\Asus\\Desktop\\UserManagementApp_RENDER\\UserManagementApp_RENDER\\UserManagementApp.csproj",
+        "projectPath": "C:\\Users\\Asus\\Desktop\\UserM\\User\\UserManagementApp.csproj",
         "packagesPath": "C:\\Users\\Asus\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\Asus\\Desktop\\UserManagementApp_RENDER\\UserManagementApp_RENDER\\obj\\",
+        "outputPath": "C:\\Users\\Asus\\Desktop\\UserM\\User\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\Asus\\AppData\\Roaming\\NuGet\\NuGet.Config"
