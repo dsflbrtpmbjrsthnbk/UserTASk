@@ -1,5 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
-using UserManagementApp.Data;
+using UserManagementApp.Data; // обязательно
 using UserManagementApp.Models;
 
 namespace UserManagementApp.Controllers

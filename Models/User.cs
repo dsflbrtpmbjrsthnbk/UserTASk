@@ -1,19 +1,16 @@
-using System.ComponentModel.DataAnnotations;
+using System;
 
 namespace UserManagementApp.Models
 {
     public class User
     {
-        public int Id { get; set; }
-        [Required, StringLength(100)] public string Name { get; set; } = string.Empty;
-        [Required, EmailAddress, StringLength(255)] public string Email { get; set; } = string.Empty;
-        [Required] public string PasswordHash { get; set; } = string.Empty;
-        public DateTime? LastLoginTime { get; set; }
-        public DateTime RegistrationTime { get; set; } = DateTime.UtcNow;
-        [Required, StringLength(20)] public string Status { get; set; } = "unverified";
-        [StringLength(100)] public string? EmailVerificationToken { get; set; }
-        public bool CanLogin() => Status != "blocked";
-        public bool IsBlocked() => Status == "blocked";
-        public bool IsVerified() => Status == "active";
+        public Guid Id { get; set; }
+        public string Name { get; set; } = string.Empty;
+        public string Email { get; set; } = string.Empty;
+        public string PasswordHash { get; set; } = string.Empty;
+        public DateTime RegisteredAt { get; set; }
+        public DateTime? LastLoginAt { get; set; }
+        public int Status { get; set; } // 0 = inactive, 1 = active
+        public string? EmailConfirmationToken { get; set; }
     }
 }

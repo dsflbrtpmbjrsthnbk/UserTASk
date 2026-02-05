@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
-using UserManagementApp.Data;
+using UserManagementApp.Data; 
 using UserManagementApp.Models;
+
 
 namespace UserManagementApp.Controllers
 {
