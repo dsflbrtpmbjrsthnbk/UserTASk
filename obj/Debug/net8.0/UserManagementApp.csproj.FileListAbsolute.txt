@@ -140,3 +140,4 @@ C:\Users\Asus\Desktop\UserM\User\obj\Debug\net8.0\refint\UserManagementApp.dll
 C:\Users\Asus\Desktop\UserM\User\obj\Debug\net8.0\UserManagementApp.pdb
 C:\Users\Asus\Desktop\UserM\User\obj\Debug\net8.0\UserManagementApp.genruntimeconfig.cache
 C:\Users\Asus\Desktop\UserM\User\obj\Debug\net8.0\ref\UserManagementApp.dll
+C:\Users\Asus\Desktop\UserM\User\bin\Debug\net8.0\UserManagementApp.staticwebassets.runtime.json
