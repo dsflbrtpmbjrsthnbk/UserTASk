@@ -15,28 +15,22 @@ if (builder.Environment.IsDevelopment())
 else
 {
     var databaseUrl = Environment.GetEnvironmentVariable("DATABASE_URL");
+    string connectionString;
+
     if (!string.IsNullOrEmpty(databaseUrl))
     {
         var uri = new Uri(databaseUrl);
         var userInfo = uri.UserInfo.Split(':');
-        var builderNpgsql = new Npgsql.NpgsqlConnectionStringBuilder
-        {
-            Host = uri.Host,
-            Port = uri.Port,
-            Database = uri.LocalPath.TrimStart('/'),
-            Username = userInfo[0],
-            Password = userInfo[1],
-            SslMode = Npgsql.SslMode.Require,
-            TrustServerCertificate = true
-        };
-        builder.Services.AddDbContext<ApplicationDbContext>(options =>
-            options.UseNpgsql(builderNpgsql.ConnectionString));
+        var port = uri.Port == -1 ? 5432 : uri.Port;
+        connectionString = $"Host={uri.Host};Port={port};Database={uri.LocalPath.TrimStart('/')};Username={userInfo[0]};Password={userInfo[1]};SSL Mode=Require;Trust Server Certificate=true";
     }
     else
     {
-        builder.Services.AddDbContext<ApplicationDbContext>(options =>
-            options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+        connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
     }
+
+    builder.Services.AddDbContext<ApplicationDbContext>(options =>
+        options.UseNpgsql(connectionString));
 }
 
 var keysPath = Path.Combine(builder.Environment.ContentRootPath, "DataProtection-Keys");
