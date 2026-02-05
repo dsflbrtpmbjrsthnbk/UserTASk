@@ -4,13 +4,13 @@ namespace UserManagementApp.Models
 {
     public class User
     {
-        public Guid Id { get; set; }
-        public string Name { get; set; } = string.Empty;
-        public string Email { get; set; } = string.Empty;
-        public string PasswordHash { get; set; } = string.Empty;
-        public DateTime RegisteredAt { get; set; }
-        public DateTime? LastLoginAt { get; set; }
-        public int Status { get; set; } // 0 = inactive, 1 = active
-        public string? EmailConfirmationToken { get; set; }
+        public Guid Id { get; set; }                         // UUID для PostgreSQL
+        public string Name { get; set; }                     // Имя пользователя
+        public string Email { get; set; }                    // Email
+        public string PasswordHash { get; set; }             // Хеш пароля
+        public DateTime? LastLoginAt { get; set; }           // Последний вход
+        public DateTime RegisteredAt { get; set; }           // Дата регистрации
+        public int Status { get; set; }                      // Статус: 0-Inactive, 1-Active, 2-Banned
+        public string? EmailConfirmationToken { get; set; } // Токен подтверждения
     }
 }
