@@ -19,199 +19,91 @@ namespace UserManagementApp.Controllers
         [HttpGet]
         public async Task<IActionResult> Index()
         {
-            if (!await CheckUserAuthentication())
-                return RedirectToAction("Login", "Account");
-
-            try
-            {
-                var users = await _context.Users
-                    .OrderByDescending(u => u.LastLoginTime ?? DateTime.MinValue)
-                    .ThenByDescending(u => u.RegistrationTime)
-                    .ToListAsync();
-
-                return View(users);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error loading users");
-                TempData["ErrorMessage"] = "An error occurred while loading users.";
-                return View(new List<User>());
-            }
+            if (!await CheckUserAuthentication()) return RedirectToAction("Login", "Account");
+            try { return View(await _context.Users.OrderByDescending(u => u.LastLoginTime ?? DateTime.MinValue).ThenByDescending(u => u.RegistrationTime).ToListAsync()); }
+            catch (Exception ex) { _logger.LogError(ex, "Error loading users"); TempData["ErrorMessage"] = "An error occurred while loading users."; return View(new List<User>()); }
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Block([FromForm] List<int> selectedIds)
         {
-            if (!await CheckUserAuthentication())
-                return RedirectToAction("Login", "Account");
-
+            if (!await CheckUserAuthentication()) return RedirectToAction("Login", "Account");
             try
             {
-                if (selectedIds == null || selectedIds.Count == 0)
-                {
-                    TempData["ErrorMessage"] = "No users selected for blocking.";
-                    return RedirectToAction("Index");
-                }
-
+                if (selectedIds == null || selectedIds.Count == 0) { TempData["ErrorMessage"] = "No users selected for blocking."; return RedirectToAction("Index"); }
                 var currentUserId = GetUniqIdValue();
                 var usersToBlock = await _context.Users.Where(u => selectedIds.Contains(u.Id)).ToListAsync();
-
-                foreach (var user in usersToBlock)
-                    user.Status = "blocked";
-
+                foreach (var user in usersToBlock) user.Status = "blocked";
                 await _context.SaveChangesAsync();
-
                 TempData["SuccessMessage"] = $"Blocked {usersToBlock.Count} user(s).";
-
-                if (currentUserId.HasValue && selectedIds.Contains(currentUserId.Value))
-                {
-                    HttpContext.Session.Clear();
-                    TempData["InfoMessage"] = "You blocked yourself and were logged out.";
-                    return RedirectToAction("Login", "Account");
-                }
-
+                if (currentUserId.HasValue && selectedIds.Contains(currentUserId.Value)) { HttpContext.Session.Clear(); TempData["InfoMessage"] = "You blocked yourself and were logged out."; return RedirectToAction("Login", "Account"); }
                 return RedirectToAction("Index");
             }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error blocking users");
-                TempData["ErrorMessage"] = "An error occurred while blocking users.";
-                return RedirectToAction("Index");
-            }
+            catch (Exception ex) { _logger.LogError(ex, "Error blocking users"); TempData["ErrorMessage"] = "An error occurred while blocking users."; return RedirectToAction("Index"); }
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Unblock([FromForm] List<int> selectedIds)
         {
-            if (!await CheckUserAuthentication())
-                return RedirectToAction("Login", "Account");
-
+            if (!await CheckUserAuthentication()) return RedirectToAction("Login", "Account");
             try
             {
-                if (selectedIds == null || selectedIds.Count == 0)
-                {
-                    TempData["ErrorMessage"] = "No users selected for unblocking.";
-                    return RedirectToAction("Index");
-                }
-
-                var usersToUnblock = await _context.Users
-                    .Where(u => selectedIds.Contains(u.Id) && u.Status == "blocked")
-                    .ToListAsync();
-
-                foreach (var user in usersToUnblock)
-                    user.Status = "active";
-
+                if (selectedIds == null || selectedIds.Count == 0) { TempData["ErrorMessage"] = "No users selected for unblocking."; return RedirectToAction("Index"); }
+                var usersToUnblock = await _context.Users.Where(u => selectedIds.Contains(u.Id) && u.Status == "blocked").ToListAsync();
+                foreach (var user in usersToUnblock) user.Status = "active";
                 await _context.SaveChangesAsync();
-
                 TempData["SuccessMessage"] = $"Unblocked {usersToUnblock.Count} user(s).";
                 return RedirectToAction("Index");
             }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error unblocking users");
-                TempData["ErrorMessage"] = "An error occurred while unblocking users.";
-                return RedirectToAction("Index");
-            }
+            catch (Exception ex) { _logger.LogError(ex, "Error unblocking users"); TempData["ErrorMessage"] = "An error occurred while unblocking users."; return RedirectToAction("Index"); }
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete([FromForm] List<int> selectedIds)
         {
-            if (!await CheckUserAuthentication())
-                return RedirectToAction("Login", "Account");
-
+            if (!await CheckUserAuthentication()) return RedirectToAction("Login", "Account");
             try
             {
-                if (selectedIds == null || selectedIds.Count == 0)
-                {
-                    TempData["ErrorMessage"] = "No users selected for deletion.";
-                    return RedirectToAction("Index");
-                }
-
+                if (selectedIds == null || selectedIds.Count == 0) { TempData["ErrorMessage"] = "No users selected for deletion."; return RedirectToAction("Index"); }
                 var currentUserId = GetUniqIdValue();
                 var usersToDelete = await _context.Users.Where(u => selectedIds.Contains(u.Id)).ToListAsync();
-
                 _context.Users.RemoveRange(usersToDelete);
                 await _context.SaveChangesAsync();
-
                 TempData["SuccessMessage"] = $"Deleted {usersToDelete.Count} user(s).";
-
-                if (currentUserId.HasValue && selectedIds.Contains(currentUserId.Value))
-                {
-                    HttpContext.Session.Clear();
-                    TempData["InfoMessage"] = "You deleted your account and were logged out.";
-                    return RedirectToAction("Login", "Account");
-                }
-
+                if (currentUserId.HasValue && selectedIds.Contains(currentUserId.Value)) { HttpContext.Session.Clear(); TempData["InfoMessage"] = "You deleted your account and were logged out."; return RedirectToAction("Login", "Account"); }
                 return RedirectToAction("Index");
             }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error deleting users");
-                TempData["ErrorMessage"] = "An error occurred while deleting users.";
-                return RedirectToAction("Index");
-            }
+            catch (Exception ex) { _logger.LogError(ex, "Error deleting users"); TempData["ErrorMessage"] = "An error occurred while deleting users."; return RedirectToAction("Index"); }
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteUnverified()
         {
-            if (!await CheckUserAuthentication())
-                return RedirectToAction("Login", "Account");
-
+            if (!await CheckUserAuthentication()) return RedirectToAction("Login", "Account");
             try
             {
                 var unverifiedUsers = await _context.Users.Where(u => u.Status == "unverified").ToListAsync();
-                if (unverifiedUsers.Count == 0)
-                {
-                    TempData["InfoMessage"] = "No unverified users found.";
-                    return RedirectToAction("Index");
-                }
-
+                if (unverifiedUsers.Count == 0) { TempData["InfoMessage"] = "No unverified users found."; return RedirectToAction("Index"); }
                 _context.Users.RemoveRange(unverifiedUsers);
                 await _context.SaveChangesAsync();
-
                 TempData["SuccessMessage"] = $"Deleted {unverifiedUsers.Count} unverified user(s).";
                 return RedirectToAction("Index");
             }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error deleting unverified users");
-                TempData["ErrorMessage"] = "An error occurred while deleting unverified users.";
-                return RedirectToAction("Index");
-            }
+            catch (Exception ex) { _logger.LogError(ex, "Error deleting unverified users"); TempData["ErrorMessage"] = "An error occurred while deleting unverified users."; return RedirectToAction("Index"); }
         }
 
         private async Task<bool> CheckUserAuthentication()
         {
             var userId = GetUniqIdValue();
-            if (!userId.HasValue)
-                return false;
-
-            try
-            {
-                var user = await _context.Users.FindAsync(userId.Value);
-                if (user == null || user.IsBlocked())
-                {
-                    HttpContext.Session.Clear();
-                    TempData["ErrorMessage"] = "Your account has been blocked or deleted.";
-                    return false;
-                }
-                return true;
-            }
-            catch
-            {
-                return false;
-            }
+            if (!userId.HasValue) return false;
+            try { var user = await _context.Users.FindAsync(userId.Value); if (user == null || user.IsBlocked()) { HttpContext.Session.Clear(); TempData["ErrorMessage"] = "Your account has been blocked or deleted."; return false; } return true; }
+            catch { return false; }
         }
 
-        private int? GetUniqIdValue()
-        {
-            return HttpContext.Session.GetInt32("UserId");
-        }
+        private int? GetUniqIdValue() => HttpContext.Session.GetInt32("UserId");
     }
 }
