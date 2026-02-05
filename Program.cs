@@ -5,10 +5,8 @@ using UserManagementApp.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// ===== НАСТРОЙКА СЕРВИСОВ =====
 builder.Services.AddControllersWithViews();
 
-// ===== БАЗА ДАННЫХ =====
 if (builder.Environment.IsDevelopment())
 {
     builder.Services.AddDbContext<ApplicationDbContext>(options =>
@@ -17,30 +15,35 @@ if (builder.Environment.IsDevelopment())
 else
 {
     var databaseUrl = Environment.GetEnvironmentVariable("DATABASE_URL");
-    string connectionString;
-
     if (!string.IsNullOrEmpty(databaseUrl))
     {
         var uri = new Uri(databaseUrl);
         var userInfo = uri.UserInfo.Split(':');
-        connectionString = $"Host={uri.Host};Port={uri.Port};Database={uri.LocalPath.TrimStart('/')};Username={userInfo[0]};Password={userInfo[1]};SSL Mode=Require;Trust Server Certificate=true";
+        var builderNpgsql = new Npgsql.NpgsqlConnectionStringBuilder
+        {
+            Host = uri.Host,
+            Port = uri.Port,
+            Database = uri.LocalPath.TrimStart('/'),
+            Username = userInfo[0],
+            Password = userInfo[1],
+            SslMode = Npgsql.SslMode.Require,
+            TrustServerCertificate = true
+        };
+        builder.Services.AddDbContext<ApplicationDbContext>(options =>
+            options.UseNpgsql(builderNpgsql.ConnectionString));
     }
     else
     {
-        connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+        builder.Services.AddDbContext<ApplicationDbContext>(options =>
+            options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
     }
-
-    builder.Services.AddDbContext<ApplicationDbContext>(options =>
-        options.UseNpgsql(connectionString));
 }
 
-// ===== DataProtection =====
 var keysPath = Path.Combine(builder.Environment.ContentRootPath, "DataProtection-Keys");
 builder.Services.AddDataProtection()
     .PersistKeysToFileSystem(new DirectoryInfo(keysPath))
     .SetApplicationName("UserManagementApp");
 
-// ===== Сессии =====
 builder.Services.AddSession(options =>
 {
     options.IdleTimeout = TimeSpan.FromHours(2);
@@ -48,15 +51,11 @@ builder.Services.AddSession(options =>
     options.Cookie.IsEssential = true;
 });
 
-// ===== Email =====
 builder.Services.AddScoped<IEmailService, EmailService>();
-
-// ===== HTTP контекст =====
 builder.Services.AddHttpContextAccessor();
 
 var app = builder.Build();
 
-// ===== Автоматическая миграция =====
 if (!app.Environment.IsDevelopment())
 {
     using var scope = app.Services.CreateScope();
@@ -72,7 +71,6 @@ if (!app.Environment.IsDevelopment())
     }
 }
 
-// ===== PIPELINE =====
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
