@@ -1,5 +1,3 @@
-using System.Threading.Tasks;
-
 namespace UserManagementApp.Services
 {
     public interface IEmailService

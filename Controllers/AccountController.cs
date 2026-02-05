@@ -19,47 +19,45 @@ namespace UserManagementApp.Controllers
             _emailService = emailService;
         }
 
+        [HttpGet]
+        public IActionResult Register() => View();
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Register(string name, string email, string password)
         {
+            if (string.IsNullOrWhiteSpace(name) || string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(password))
+            {
+                TempData["ErrorMessage"] = "All fields are required.";
+                return View();
+            }
+
+            var verificationToken = Guid.NewGuid().ToString();
+            var passwordHash = BCrypt.Net.BCrypt.HashPassword(password);
+
+            var user = new User { Name = name, Email = email.ToLower(), PasswordHash = passwordHash, Status = "unverified", RegistrationTime = DateTime.UtcNow, EmailVerificationToken = verificationToken };
+
             try
             {
-                if (string.IsNullOrWhiteSpace(name) || string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(password))
-                {
-                    TempData["ErrorMessage"] = "All fields are required.";
-                    return View();
-                }
-
-                var verificationToken = Guid.NewGuid().ToString();
-                var passwordHash = BCrypt.Net.BCrypt.HashPassword(password);
-
-                var user = new User { Name = name, Email = email.ToLower(), PasswordHash = passwordHash, Status = "unverified", RegistrationTime = DateTime.UtcNow, EmailVerificationToken = verificationToken };
-
                 _context.Users.Add(user);
                 await _context.SaveChangesAsync();
-
-                _logger.LogInformation($"User {user.Email} registered successfully");
                 _ = _emailService.SendVerificationEmailAsync(user.Email, user.Name, verificationToken);
-
-                TempData["SuccessMessage"] = "Registration successful! A verification email has been sent to your address. You can login now.";
+                TempData["SuccessMessage"] = "Registration successful! Verification email sent.";
                 return RedirectToAction("Login");
             }
-            catch (DbUpdateException ex)
+            catch (DbUpdateException ex) when (ex.InnerException != null && (ex.InnerException.Message.Contains("duplicate key") || ex.InnerException.Message.Contains("IX_Users_Email_Unique")))
             {
-                _logger.LogError($"DbUpdateException during registration: {ex.Message}");
-                if (ex.InnerException != null && (ex.InnerException.Message.Contains("duplicate") || ex.InnerException.Message.Contains("IX_Users_Email_Unique")))
-                    TempData["ErrorMessage"] = "This email is already registered. Please use a different email or login.";
-                else
-                    TempData["ErrorMessage"] = $"An error occurred during registration: {ex.Message}";
+                TempData["ErrorMessage"] = "Email already registered.";
                 return View();
             }
             catch (Exception ex)
             {
-                _logger.LogError($"Exception during registration: {ex}");
-                TempData["ErrorMessage"] = $"An error occurred during registration: {ex.Message}";
+                TempData["ErrorMessage"] = $"Error: {ex.Message}";
                 return View();
             }
         }
+
+        [HttpGet]
+        public IActionResult Login() => View();
     }
 }
